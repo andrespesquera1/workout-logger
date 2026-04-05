@@ -225,8 +225,8 @@ export default function App() {
     const sets = parseInt(form.sets);
     const reps = parseInt(form.reps);
     if (!ex) return setFeedback({ msg: "Enter an exercise name.", type: "error" });
-    if (!wt || !sets || !reps) return setFeedback({ msg: "Fill in weight, sets, and reps.", type: "error" });
-    const entry = { id: Date.now(), exercise: ex, weight: wt, sets, reps, notes: form.notes.trim(), date: today(), ts: Date.now() };
+    if (!sets || !reps) return setFeedback({ msg: "Fill in sets and reps.", type: "error" });
+    const entry = { id: Date.now(), exercise: ex, weight: wt || 0, sets, reps, notes: form.notes.trim(), date: today(), ts: Date.now() };
     saveLogs([entry, ...logs]);
     setForm({ exercise: "", weight: "", sets: "", reps: "", notes: "" });
     setFeedback({ msg: "Set logged!", type: "success" });
@@ -311,7 +311,7 @@ export default function App() {
                       <div className="log-item" key={l.id}>
                         <div>
                           <div className="log-name">{l.exercise}</div>
-                          <div className="log-meta">{l.sets} sets × {l.reps} reps @ {l.weight} lb · Vol: {volume(l).toLocaleString()}</div>
+                          <div className="log-meta">{l.sets} sets × {l.reps} reps{l.weight ? ` @ ${l.weight} lb · Vol: ${volume(l).toLocaleString()}` : ""}</div>
                           {l.notes && <div className="log-note">{l.notes}</div>}
                         </div>
                         <button className="del-btn" onClick={() => deleteLog(l.id)}>×</button>
@@ -355,7 +355,7 @@ export default function App() {
                       <div className="log-item" key={l.id}>
                         <div>
                           <div className="log-name">{l.exercise}</div>
-                          <div className="log-meta">{l.sets} × {l.reps} @ {l.weight} lb · Vol: {volume(l).toLocaleString()}</div>
+                          <div className="log-meta">{l.sets} × {l.reps}{l.weight ? ` @ ${l.weight} lb · Vol: ${volume(l).toLocaleString()}` : ""}</div>
                           {l.notes && <div className="log-note">{l.notes}</div>}
                         </div>
                         <div className="log-right">
