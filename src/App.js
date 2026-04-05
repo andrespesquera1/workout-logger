@@ -3,9 +3,67 @@ import { useState, useCallback } from "react";
 const STORAGE_KEY = "workout_logs_v1";
 
 const EXERCISES = [
-  "Bench Press", "Squat", "Deadlift", "Overhead Press", "Barbell Row",
-  "Pull-ups", "Dips", "Incline Press", "Leg Press", "Romanian Deadlift",
-  "Lat Pulldown", "Cable Row", "Chest Fly", "Tricep Pushdown", "Bicep Curl"
+  // Chest
+  "Bench Press", "Incline Bench Press", "Decline Bench Press",
+  "Dumbbell Bench Press", "Incline Dumbbell Press", "Decline Dumbbell Press",
+  "Dumbbell Fly", "Incline Dumbbell Fly", "Cable Fly", "Low Cable Fly",
+  "High Cable Fly", "Pec Deck Fly", "Reverse Pec Deck Fly",
+  "Push-ups", "Dips", "Machine Chest Press", "Smith Machine Bench Press",
+
+  // Back
+  "Deadlift", "Romanian Deadlift", "Sumo Deadlift", "Barbell Row",
+  "Pendlay Row", "Dumbbell Row", "T-Bar Row", "Seal Row",
+  "Pull-ups", "Chin-ups", "Lat Pulldown", "Wide Grip Lat Pulldown",
+  "Close Grip Lat Pulldown", "Cable Row", "Seated Cable Row",
+  "Single Arm Cable Row", "Machine Row", "Straight Arm Pulldown",
+  "Face Pull", "Hyperextension", "Good Morning",
+
+  // Shoulders
+  "Overhead Press", "Dumbbell Shoulder Press", "Arnold Press",
+  "Lateral Raise", "Cable Lateral Raise", "Front Raise",
+  "Dumbbell Front Raise", "Rear Delt Fly", "Cable Rear Delt Fly",
+  "Machine Shoulder Press", "Smith Machine Shoulder Press",
+  "Upright Row", "Shrugs", "Barbell Shrugs", "Dumbbell Shrugs",
+
+  // Biceps
+  "Bicep Curl", "Barbell Curl", "EZ Bar Curl", "EZ Bar Hammer Curl",
+  "Dumbbell Curl", "Hammer Curl", "Incline Dumbbell Curl",
+  "Decline Dumbbell Curl", "Concentration Curl", "Preacher Curl",
+  "Cable Curl", "Cable Hammer Curl", "Machine Curl",
+  "Spider Curl", "Reverse Curl", "Zottman Curl",
+
+  // Triceps
+  "Tricep Pushdown", "Cable Tricep Pushdown", "Rope Pushdown",
+  "Overhead Tricep Extension", "Skull Crushers", "EZ Bar Skull Crusher",
+  "Close Grip Bench Press", "Diamond Push-ups", "Tricep Kickback",
+  "Cable Overhead Tricep Extension", "Machine Tricep Extension",
+
+  // Legs - Quads
+  "Squat", "Back Squat", "Front Squat", "Goblet Squat",
+  "Bulgarian Split Squat", "Split Squat", "Hack Squat",
+  "Pendulum Squat", "Leg Press", "Leg Extension",
+  "Sissy Squat", "Smith Machine Squat", "Overhead Squat",
+  "Box Squat", "Pause Squat", "Zercher Squat",
+
+  // Legs - Hamstrings & Glutes
+  "Lying Leg Curl", "Seated Leg Curl", "Nordic Curl",
+  "Hip Thrust", "Barbell Hip Thrust", "Glute Bridge",
+  "Cable Kickback", "Donkey Kickback", "Romanian Deadlift",
+  "Single Leg Romanian Deadlift", "Step Up", "Reverse Lunge",
+  "Walking Lunge", "Lateral Lunge",
+
+  // Calves
+  "Standing Calf Raise", "Seated Calf Raise", "Leg Press Calf Raise",
+  "Donkey Calf Raise", "Single Leg Calf Raise",
+
+  // Core
+  "Plank", "Ab Wheel Rollout", "Cable Crunch", "Hanging Leg Raise",
+  "Decline Sit-up", "Russian Twist", "Pallof Press",
+  "Landmine Rotation", "Woodchop", "Side Plank",
+
+  // Olympic & Compound
+  "Power Clean", "Hang Clean", "Clean and Jerk", "Snatch",
+  "Thruster", "Farmer's Carry", "Trap Bar Deadlift",
 ];
 
 function today() {
