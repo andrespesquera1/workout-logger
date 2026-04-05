@@ -71,7 +71,13 @@ function today() {
 }
 
 function volume(entry) {
+  if (entry.bodyweight || entry.weight === 0) return entry.sets * entry.reps;
   return entry.sets * entry.reps * entry.weight;
+}
+
+function volumeLabel(entry) {
+  if (entry.bodyweight || entry.weight === 0) return `${entry.sets} sets × ${entry.reps} reps · Bodyweight`;
+  return `${entry.sets} sets × ${entry.reps} reps @ ${entry.weight} lb · Vol: ${volume(entry).toLocaleString()}`;
 }
 
 function suggestWeight(weight) {
@@ -139,7 +145,10 @@ const styles = `
   .notes-row input:focus { border-color:var(--border-bright); }
   .notes-row input::placeholder { color:var(--text3); }
 
-  .add-btn { width:100%; padding:12px; background:var(--accent); color:#000; border:none; border-radius:var(--radius-sm); font-family:var(--font-display); font-size:18px; letter-spacing:0.05em; cursor:pointer; transition:all 0.15s; margin-top:4px; }
+  .bw-toggle { display:flex; align-items:center; gap:8px; margin-bottom:10px; cursor:pointer; user-select:none; width:fit-content; }
+  .bw-toggle input[type=checkbox] { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; }
+  .bw-toggle span { font-size:13px; color:var(--text2); }
+  .bw-badge { display:inline-block; padding:1px 7px; border-radius:999px; font-size:10px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; background:rgba(200,241,53,0.08); color:var(--accent); border:0.5px solid rgba(200,241,53,0.2); margin-left:6px; vertical-align:middle; }
   .add-btn:hover { opacity:0.9; transform:translateY(-1px); }
   .add-btn:active { transform:translateY(0); }
 
@@ -204,7 +213,7 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
   });
   const [tab, setTab] = useState("log");
-  const [form, setForm] = useState({ exercise: "", weight: "", sets: "", reps: "", notes: "" });
+  const [form, setForm] = useState({ exercise: "", weight: "", sets: "", reps: "", notes: "", bodyweight: false });
   const [feedback, setFeedback] = useState({ msg: "", type: "" });
 
   const saveLogs = useCallback((l) => {
@@ -218,14 +227,15 @@ export default function App() {
 
   const addSet = () => {
     const ex = form.exercise.trim();
-    const wt = parseFloat(form.weight);
     const sets = parseInt(form.sets);
     const reps = parseInt(form.reps);
+    const wt = form.bodyweight ? 0 : parseFloat(form.weight);
     if (!ex) return setFeedback({ msg: "Enter an exercise name.", type: "error" });
-    if (!wt || !sets || !reps) return setFeedback({ msg: "Fill in weight, sets, and reps.", type: "error" });
-    const entry = { id: Date.now(), exercise: ex, weight: wt, sets, reps, notes: form.notes.trim(), date: today(), ts: Date.now() };
+    if (!form.bodyweight && !wt) return setFeedback({ msg: "Fill in weight, sets, and reps.", type: "error" });
+    if (!sets || !reps) return setFeedback({ msg: "Fill in sets and reps.", type: "error" });
+    const entry = { id: Date.now(), exercise: ex, weight: wt, sets, reps, notes: form.notes.trim(), date: today(), ts: Date.now(), bodyweight: form.bodyweight };
     saveLogs([entry, ...logs]);
-    setForm({ exercise: "", weight: "", sets: "", reps: "", notes: "" });
+    setForm({ exercise: "", weight: "", sets: "", reps: "", notes: "", bodyweight: form.bodyweight });
     setFeedback({ msg: "Set logged!", type: "success" });
     setTimeout(() => setFeedback({ msg: "", type: "" }), 2000);
   };
@@ -259,16 +269,22 @@ export default function App() {
             <>
               <div className="card">
                 <div className="card-title">New set</div>
+                <label className="bw-toggle">
+                  <input type="checkbox" checked={form.bodyweight} onChange={e => setField("bodyweight", e.target.checked)} />
+                  <span>Bodyweight exercise</span>
+                </label>
                 <div className="form-grid">
                   <div className="field">
                     <label>Exercise</label>
                     <input list="ex-list" value={form.exercise} onChange={e => setField("exercise", e.target.value)} placeholder="Bench Press" />
                     <datalist id="ex-list">{EXERCISES.map(ex => <option key={ex} value={ex} />)}</datalist>
                   </div>
-                  <div className="field">
-                    <label>Weight (lb)</label>
-                    <input type="number" value={form.weight} onChange={e => setField("weight", e.target.value)} placeholder="135" min="0" />
-                  </div>
+                  {!form.bodyweight && (
+                    <div className="field">
+                      <label>Weight (lb)</label>
+                      <input type="number" value={form.weight} onChange={e => setField("weight", e.target.value)} placeholder="135" min="0" />
+                    </div>
+                  )}
                   <div className="field">
                     <label>Sets</label>
                     <input type="number" value={form.sets} onChange={e => setField("sets", e.target.value)} placeholder="3" min="1" />
@@ -293,7 +309,7 @@ export default function App() {
                       <div className="log-item" key={l.id}>
                         <div>
                           <div className="log-name">{l.exercise}</div>
-                          <div className="log-meta">{l.sets} sets × {l.reps} reps @ {l.weight} lb · Vol: {volume(l).toLocaleString()}</div>
+                          <div className="log-meta">{volumeLabel(l)}{l.bodyweight && <span className="bw-badge">BW</span>}</div>
                           {l.notes && <div className="log-note">{l.notes}</div>}
                         </div>
                         <button className="del-btn" onClick={() => deleteLog(l.id)}>×</button>
@@ -335,7 +351,7 @@ export default function App() {
                     <div className="log-item" key={l.id}>
                       <div>
                         <div className="log-name">{l.exercise}</div>
-                        <div className="log-meta">{l.sets} × {l.reps} @ {l.weight} lb · Vol: {volume(l).toLocaleString()}</div>
+                        <div className="log-meta">{volumeLabel(l)}{l.bodyweight && <span className="bw-badge">BW</span>}</div>
                         {l.notes && <div className="log-note">{l.notes}</div>}
                       </div>
                       <div className="log-right">
@@ -366,7 +382,10 @@ export default function App() {
                   const trend = diff > 0 ? "up" : diff === 0 ? "same" : "down";
                   const barWidth = Math.min(100, Math.max(5, pct + 50));
                   const badgeText = trend === "up" ? `Volume +${pct}%` : trend === "same" ? "Same volume" : `Volume ${pct}%`;
-                  const suggestion = trend === "up"
+                  const isBW = latest.bodyweight || latest.weight === 0;
+                  const suggestion = isBW
+                    ? trend === "up" ? "Keep adding reps or sets" : trend === "same" ? "Try +1 rep or an extra set" : "Recover and match your last session"
+                    : trend === "up"
                     ? `Next session: aim for ${suggestWeight(latest.weight)} lb`
                     : trend === "same"
                     ? "Try +1 rep or +5 lb next time"
@@ -375,19 +394,19 @@ export default function App() {
                     <div className={`progress-card ${trend}`} key={ex}>
                       <div className="progress-top">
                         <div>
-                          <div className="prog-name">{ex}</div>
+                          <div className="prog-name">{ex}{isBW && <span className="bw-badge">BW</span>}</div>
                           <div className="prog-date">{latest.date}</div>
                         </div>
                         <div>
-                          <div className="prog-weight">{latest.weight}</div>
-                          <div className="prog-unit">lb</div>
+                          <div className="prog-weight">{isBW ? `${latest.sets}×${latest.reps}` : latest.weight}</div>
+                          <div className="prog-unit">{isBW ? "sets×reps" : "lb"}</div>
                         </div>
                       </div>
                       <div className="prog-detail">
                         <span>Sets: {latest.sets}</span>
                         <span>Reps: {latest.reps}</span>
-                        <span>Vol: {volume(latest).toLocaleString()}</span>
-                        <span>Prev vol: {volume(prev).toLocaleString()}</span>
+                        {!isBW && <span>Vol: {volume(latest).toLocaleString()}</span>}
+                        {!isBW && <span>Prev vol: {volume(prev).toLocaleString()}</span>}
                       </div>
                       <span className={`badge ${trend}`}>{badgeText}</span>
                       <div className="bar-wrap">
